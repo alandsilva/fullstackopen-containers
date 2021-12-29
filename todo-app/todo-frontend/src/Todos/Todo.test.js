@@ -14,7 +14,4 @@ test('renders content', () => {
   expect(component.container).toHaveTextContent(
     'Component testing is done with react-testing-library'
   );
-  expect(component.container).toHaveTextContent(
-    'Component testing is done as a jest'
-  );
 });
