@@ -7,15 +7,18 @@ morgan.token('body', (req) => {
   return JSON.stringify(req.body);
 });
 
-const Person = require('./models/person');
+const { Person } = require('./mongo');
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('build'));
+// app.use(express.static('build'));
 app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms :body')
 );
 
+app.get('/', (request, response) => {
+  response.send('Hello');
+});
 app.get('/info', (request, response, next) => {
   Person.find({})
     .then((people) => {
@@ -27,7 +30,7 @@ app.get('/info', (request, response, next) => {
     });
 });
 
-app.get('/api/persons', (request, response, next) => {
+app.get('/persons', (request, response, next) => {
   Person.find({})
     .then((people) => {
       response.json(people);
@@ -36,7 +39,7 @@ app.get('/api/persons', (request, response, next) => {
       next(error);
     });
 });
-app.get('/api/persons/:id', (request, response, next) => {
+app.get('/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then((person) => {
       if (person) {
@@ -51,7 +54,7 @@ app.get('/api/persons/:id', (request, response, next) => {
     });
 });
 
-app.delete('/api/persons/:id', (request, response, next) => {
+app.delete('/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
     .then(() => {
       response.status(204).end();
@@ -59,7 +62,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.post('/api/persons', (request, response, next) => {
+app.post('/persons', (request, response, next) => {
   let body = request.body;
   if (!body.name || !body.number) {
     return response.status(400).json({
@@ -85,7 +88,7 @@ app.post('/api/persons', (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.put('/api/persons/:id', (request, response, next) => {
+app.put('/persons/:id', (request, response, next) => {
   const body = request.body;
   const person = {
     number: body.number,
@@ -123,7 +126,7 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

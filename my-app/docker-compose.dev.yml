@@ -1,0 +1,40 @@
+services:
+  nginx:
+    image: nginx:1.20.1
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    container_name: myapp-reverse-proxy
+  app:
+    image: myapp-frontend-dev
+    build:
+      context: ./frontend
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./frontend/:/usr/src/app
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8080/api/persons
+    container_name: myapp-frontend-dev # This will name the container hello-front-dev
+  api:
+    image: myapp-backend-dev
+    build:
+      context: ./backend
+      dockerfile: dev.Dockerfile
+    ports:
+      - 3001:3000
+    volumes:
+      - ./backend:/usr/src/app/
+    environment:
+      - MONGO_URL=mongodb://the_username:the_password@myapp-backend-mongo:27017/the_database
+    container_name: myapp-backend-devs
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: the_database
+    volumes:
+      - ./backend/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+      - ./backend/mongo_data:/data/db
+    container_name: myapp-backend-mongo
